@@ -18,10 +18,36 @@ router.post("/login", (req, res, next) => {
   })(req, res, next)
 })
 
+router.get('/google', 
+  passport.authenticate('google', { scope: [
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/userinfo.email"
+    ]
+  })
+)
+
+// router.get('/google/callback', 
+// passport.authenticate('google', { 
+//   successRedirect: '/auth/login',
+//   failureRedirect: '/auth/login'
+//   })
+// );
+
+router.get('/google/callback',  (req, res, next) => {
+  console.log("google callback function start")
+  
+  passport.authenticate('google', res.status(401).json({error: 'user not authenticatd'})),
+    function(req, res) {
+      // Successful authentication, redirect home.
+      res.status(200).json({user: req.user});
+    }
+    console.log("google callback function end")
+})
+
 router.post("/signup", (req, res, next) => {
   const username = req.body.username;
   const password = req.body.password;
-  console.log("req : ", req.body)
+  console.log("req : ", req)
   if (!username || !password ) {
     res.status(401).json({ message: "Indicate username and password" });
     return;
@@ -38,9 +64,7 @@ router.post("/signup", (req, res, next) => {
 
     const newUser = new User({
       username,
-      password: hashPass,
-      campus: req.body.campus,
-      course: req.body.course
+      password: hashPass
     });
 
     newUser.save()
@@ -52,6 +76,14 @@ router.post("/signup", (req, res, next) => {
     })
   });
 });
+
+router.get("/isLoggedIn", (req, res) => {
+  if(req.isAuthenticated()) {
+    res.status(200).json(req.user)
+    return
+  }
+  res.status(403).json({message: 'please authenticate'})
+})
 
 router.get("/logout", (req, res) => {
   req.logout();

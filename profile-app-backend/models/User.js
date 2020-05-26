@@ -12,8 +12,9 @@ const userSchema = new Schema({
     type: String, 
    enum: ['Web Dev', 'UX/UI', 'Data Analytics']
   },
-  image: String
-}, {
+  profileimage: String,
+  googleId: { type: String, unique: true }
+}, { 
   timestamps: {
     createdAt: 'created_at',
     updatedAt: 'updated_at'
